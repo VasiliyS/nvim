@@ -26,12 +26,9 @@ call plug#begin('~/.local/share/nvim/plugged')
 	Plug 'tpope/vim-fugitive'
 	" -- generic language tools ---
 	"  Syntastic
-	Plug 'vim-syntastic/syntastic'
-	Plug 'autozimu/LanguageClient-neovim', {
-	    	\ 'branch': 'next',
-	    	\ 'do': 'bash install.sh',
-	    	\ }
-
+	"Plug 'vim-syntastic/syntastic'
+	" LSC Ale
+	Plug 'w0rp/ale'
 	" (Optional) Multi-entry selection UI.
 	Plug 'junegunn/fzf'
 	" Deoplete completion
@@ -57,18 +54,26 @@ set guifont=Liberation\ Mono\ for\ PowerLine\ 10
 let g:airline_powerline_fonts=1
 
 " Language client settings
-" Required for operations modifying multiple buffers like rename.
 set hidden
 
-let g:LanguageClient_serverCommands = {
-    \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
-    \ 'javascript': ['/usr/local/bin/javascript-typescript-stdio'],
-    \ 'javascript.jsx': ['tcp://127.0.0.1:2089'],
-    \ 'python': ['/usr/local/bin/pyls'],
-    \ }
+" Deoplete config
+ let g:deoplete#enable_at_startup = 1
+" Deoplete tab-complete
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
-nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-" Or map each action separately
-nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+" --------  ale settings ------------
+le config
+let g:ale_rust_rls_toolchain = "stable"
+let g:ale_linters = {
+            \ 'python': ['pylint', 'pyls'],
+            \ 'rust': ['rls', 'cargo'],
+            \ 'bash': ['shellcheck'],
+            \ }
+
+let g:ale_fix_on_save = 1
+let g:ale_fixers = {
+            \ 'rust': ['rustfmt'],
+            \ 'bash': ['shfmt'],
+            \ }
+
